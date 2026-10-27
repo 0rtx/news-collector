@@ -3,9 +3,12 @@
 const FAV_KEY = 'news_favs_v1';
 const itemRegistry = {};
 let favs = loadFavs();
-let newsAll = [];
-let newsShown = 0;
+let newsCompany = [];
+let newsOther = [];
+let companyShown = 0;
+let otherShown = 0;
 const NEWS_CHUNK = 100;
+let currentFilter = '全部';
 
 const $ = (id) => document.getElementById(id);
 
@@ -107,19 +110,57 @@ function buildNewsItem(it, isNew) {
   return div;
 }
 
-function appendNewsChunk() {
-  const box = $('news');
-  const chunk = newsAll.slice(newsShown, newsShown + NEWS_CHUNK);
+function hasTag(it, tag) {
+  return (it.tags || []).indexOf(tag) >= 0;
+}
+
+function filteredOther() {
+  if (currentFilter === '全部') return newsOther;
+  return newsOther.filter((it) => hasTag(it, currentFilter));
+}
+
+function appendCompanyChunk() {
+  const box = $('company');
+  const chunk = newsCompany.slice(companyShown, companyShown + NEWS_CHUNK);
   const frag = document.createDocumentFragment();
   for (const it of chunk) frag.appendChild(buildNewsItem(it, false));
   box.appendChild(frag);
-  newsShown += chunk.length;
-  updateNewsMore();
+  companyShown += chunk.length;
+  updateCompanyMore();
 }
 
-function updateNewsMore() {
+function updateCompanyMore() {
+  let btn = $('company-more');
+  const remaining = newsCompany.length - companyShown;
+  if (!remaining) {
+    if (btn) btn.style.display = 'none';
+    return;
+  }
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'company-more';
+    btn.className = 'load-more';
+    btn.addEventListener('click', appendCompanyChunk);
+    $('company').parentElement.appendChild(btn);
+  }
+  btn.style.display = 'block';
+  btn.textContent = '加载更多（还有 ' + remaining + ' 条）';
+}
+
+function appendOtherChunk() {
+  const box = $('news');
+  const list = filteredOther();
+  const chunk = list.slice(otherShown, otherShown + NEWS_CHUNK);
+  const frag = document.createDocumentFragment();
+  for (const it of chunk) frag.appendChild(buildNewsItem(it, false));
+  box.appendChild(frag);
+  otherShown += chunk.length;
+  updateOtherMore();
+}
+
+function updateOtherMore() {
   let btn = $('news-more');
-  const remaining = newsAll.length - newsShown;
+  const remaining = filteredOther().length - otherShown;
   if (!remaining) {
     if (btn) btn.style.display = 'none';
     return;
@@ -128,19 +169,49 @@ function updateNewsMore() {
     btn = document.createElement('button');
     btn.id = 'news-more';
     btn.className = 'load-more';
-    btn.addEventListener('click', appendNewsChunk);
+    btn.addEventListener('click', appendOtherChunk);
     $('news').parentElement.appendChild(btn);
   }
   btn.style.display = 'block';
   btn.textContent = '加载更多（还有 ' + remaining + ' 条）';
 }
 
+function renderNewsFilters() {
+  const box = $('news-filters');
+  const cats = ['全部', '市场', '国际', '观点', '焦点', '其他'];
+  box.innerHTML = '';
+  for (const c of cats) {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (c === currentFilter ? ' active' : '');
+    btn.textContent = c;
+    btn.addEventListener('click', () => {
+      currentFilter = c;
+      otherShown = 0;
+      $('news').innerHTML = '';
+      appendOtherChunk();
+      renderNewsFilters();
+    });
+    box.appendChild(btn);
+  }
+}
+
+function renderCompany(data) {
+  const items = (data && data.items) || [];
+  newsCompany = items.filter((it) => hasTag(it, '公司'));
+  companyShown = 0;
+  $('company').innerHTML = '';
+  appendCompanyChunk();
+  $('company-updated').textContent = newsCompany.length ? newsCompany.length + ' 条' : '--';
+}
+
 function renderNews(data) {
-  newsAll = (data && data.items) || [];
-  newsShown = 0;
+  const items = (data && data.items) || [];
+  newsOther = items.filter((it) => !hasTag(it, '公司'));
+  otherShown = 0;
   $('news').innerHTML = '';
-  appendNewsChunk();
-  $('news-updated').textContent = newsAll.length ? '全天 ' + newsAll.length + ' 条' : '--';
+  appendOtherChunk();
+  renderNewsFilters();
+  $('news-updated').textContent = newsOther.length ? '全天 ' + newsOther.length + ' 条' : '--';
 }
 
 function renderAnn(data) {
@@ -253,6 +324,7 @@ async function refreshAll() {
       fetchJSON('data/ann.json'),
     ]);
     renderImportant(cls);
+    renderCompany(news);
     renderNews(news);
     renderAnn(ann);
   } catch (e) {

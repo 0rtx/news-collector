@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>实时快讯 · 重要消息</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header class="topbar">
@@ -33,11 +33,20 @@
       <div class="important" id="important"></div>
     </section>
 
+    <section class="panel company-panel">
+      <div class="panel-head">
+        <h2>公司快讯</h2>
+        <span class="updated" id="company-updated">--</span>
+      </div>
+      <div class="news" id="company"></div>
+    </section>
+
     <section class="panel news-panel">
       <div class="panel-head">
         <h2>7×24 快讯</h2>
         <span class="updated" id="news-updated">--</span>
       </div>
+      <div class="news-filters" id="news-filters"></div>
       <div class="news" id="news"></div>
     </section>
   </main>
@@ -66,6 +75,6 @@
     <div class="ann-list drawer-list" id="announcements"></div>
   </aside>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
