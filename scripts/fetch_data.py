@@ -17,6 +17,9 @@ import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+TZ = ZoneInfo("Asia/Shanghai")
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE, "docs", "data")
@@ -100,7 +103,7 @@ def update_cls():
             store[str(rid)] = {
                 "id": rid,
                 "ctime": ctime,
-                "time": datetime.fromtimestamp(ctime).strftime("%m-%d %H:%M"),
+                "time": datetime.fromtimestamp(ctime, TZ).strftime("%m-%d %H:%M"),
                 "text": text or title,
                 "reading_num": int(it.get("reading_num") or 0),
                 "level": str(it.get("level") or ""),
@@ -116,7 +119,7 @@ def update_cls():
     items.sort(key=lambda x: x["reading_num"], reverse=True)
     save_json(
         "cls.json",
-        {"updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "items": items[:30]},
+        {"updated": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "items": items[:30]},
     )
 
 
@@ -165,12 +168,12 @@ def update_sina():
             item = parse_sina_item(it)
             if item["id"] is not None:
                 store[item["id"]] = item
-    cutoff = (datetime.now() - timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
+    cutoff = (datetime.now(TZ) - timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
     items = [v for v in store.values() if v["time"] >= cutoff]
     items.sort(key=lambda x: x["time"], reverse=True)
     save_json(
         "news.json",
-        {"updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "items": items},
+        {"updated": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "items": items},
     )
 
 
@@ -203,12 +206,12 @@ def update_ann():
             "time": (it.get("display_time") or "")[:16],
             "url": f"https://pdf.dfcfw.com/pdf/H2_{art}_1.pdf",
         }
-    cutoff = (datetime.now() - timedelta(hours=24)).strftime("%Y-%m-%d")
+    cutoff = (datetime.now(TZ) - timedelta(hours=24)).strftime("%Y-%m-%d")
     items = [v for v in store.values() if v["date"] >= cutoff]
     items.sort(key=lambda x: x["time"], reverse=True)
     save_json(
         "ann.json",
-        {"updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "items": items},
+        {"updated": datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S"), "items": items},
     )
 
 
