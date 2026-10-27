@@ -84,7 +84,7 @@ function renderImportant(data) {
     div.innerHTML = `
       <div class="imp-rank">${i + 1}</div>
       <div class="imp-body">
-        <div class="imp-text">${item.url ? `<a href="${esc(item.url)}">${esc(item.text)}</a>` : esc(item.text)}</div>
+        <div class="imp-text">${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.text)}</a>` : esc(item.text)}</div>
         <div class="imp-meta">${lvl}<span class="read">阅读 ${esc(read)}</span><span class="dot">·</span><span>${esc(it.time)}</span></div>
       </div>
       ${starHtml(item)}`;
@@ -99,7 +99,7 @@ function buildNewsItem(it, isNew) {
   const div = document.createElement('div');
   div.className = 'news-item' + (isNew ? ' fresh' : '');
   const tags = (it.tags || []).map((t) => `<span class="news-tag">${esc(t)}</span>`).join('');
-  const text = item.url ? `<a href="${esc(item.url)}">${esc(item.text)}</a>` : esc(item.text);
+  const text = item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.text)}</a>` : esc(item.text);
   div.innerHTML = `
     <div class="news-time">${esc(shortTimeHM(item.time))}</div>
     <div class="news-body"><div class="news-text">${text}<span class="news-tags">${tags}</span></div></div>
@@ -152,7 +152,7 @@ function renderAnn(data) {
     itemRegistry[item.fid] = item;
     const div = document.createElement('div');
     div.className = 'ann-item';
-    const title = item.url ? `<a href="${esc(item.url)}">${esc(item.title)}</a>` : esc(item.title);
+    const title = item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">${esc(item.title)}</a>` : esc(item.title);
     const cat = it.category ? `<span class="ann-cat">${esc(it.category)}</span>` : '';
     div.innerHTML = `
       <div class="ann-date">${esc((it.date || '').slice(5))}</div>
@@ -178,7 +178,7 @@ function renderFavs() {
     itemRegistry[item.fid] = item;
     const div = document.createElement('div');
     div.className = 'news-item';
-    const text = f.url ? `<a href="${esc(f.url)}">${esc(f.text)}</a>` : esc(f.text);
+    const text = f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.text)}</a>` : esc(f.text);
     div.innerHTML = `
       <div class="news-time">${esc(shortTimeHM(f.time))}</div>
       <div class="news-body"><div class="news-text">${text}<span class="news-src">${esc(f.src)}</span></div></div>
